@@ -10,7 +10,8 @@ import requests
 from rest_framework.permissions import IsAuthenticated, AllowAny
 import os
 from django.http import JsonResponse
-from google import genai
+import google.generativeai as genai
+from decouple import config
 
 load_dotenv()
 class NoteListCreateView(generics.ListCreateAPIView):
@@ -45,15 +46,17 @@ class AnswerView(generics.CreateAPIView):
     serializer_class = AnswerSerializer
     permission_classes = [AllowAny]
 
+
     def post(self, request):
         data = request.data.get('data')
         print(data)
+        
         try:
             question_api_key = os.getenv('API_KEY_FOR_USER')
             response = requests.post(f'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={question_api_key}', json={
                 "contents": data
             })
-            print(response.json())
+
             return JsonResponse(response.json())
         except:
             return JsonResponse({'error': 'An error occurred while processing your request.'})
